@@ -4,7 +4,7 @@
 
 ### Dans index.js
 
-`const bodyParser = require('body-parser');`
+`const bodyParser = require('body-parser');`<br>
 `const cors = require('cors'); app.use(cors());`
 
 ### Dans package.json
