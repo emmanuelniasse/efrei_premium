@@ -58,7 +58,6 @@ classesRouter
                     throw new Error('Classe déjà existante');
                 }
             }
-            /*****/
 
             const insertedCourse = await db
                 .collection('classes')

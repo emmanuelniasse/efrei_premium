@@ -1,11 +1,12 @@
-# Librairies
+## Librairies
 
-===
-`npm i body-parser`
-===
-`npm i cors`
-const cors = require('cors');
-app.use(cors());
-===
-`npm i nodemon`
-=> package.json { "dev" : "nodemon index.js" }
+`npm i body-parser cors nodemon`
+
+### Dans index.js
+
+`const bodyParser = require('body-parser');`
+`const cors = require('cors'); app.use(cors());`
+
+### Dans package.json
+
+`{ "dev" : "nodemon index.js" }`
