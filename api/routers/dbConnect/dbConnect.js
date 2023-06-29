@@ -1,11 +1,16 @@
 const config = require('../../config/config.json');
-const { MongoClient } = require('mongodb');
+const mongoose = require('mongoose');
 
-// Fonction de connexion à la base de données
-exports.connect = async function connect() {
-    const client = await MongoClient.connect(config.dbURL, {
-        useUnifiedTopology: true,
-    });
-    const db = client.db();
-    return { client, db };
+const connect = async () => {
+    try {
+        await mongoose.connect(config.dbURL, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
+        console.log('Connected to MongoDB');
+    } catch (error) {
+        console.error('Failed to connect to MongoDB', error);
+    }
 };
+
+module.exports = { connect };

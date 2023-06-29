@@ -1,20 +1,14 @@
 const express = require('express');
 const studentsRouter = express.Router();
 const { ObjectId } = require('mongodb');
-const dbConnect = require('./dbConnect/dbConnect');
+const Students = require('../schemas/studentsSchema');
 
 studentsRouter
     // READ ALL
     .get('/students', async (req, res) => {
         try {
-            const { client, db } = await dbConnect.connect();
-            const students = await db
-                .collection('students')
-                .find()
-                .toArray();
-
+            const students = await Students.find();
             res.send(students);
-            client.close();
         } catch (err) {
             res.status(500).json({ message: err.message });
         }
@@ -23,17 +17,15 @@ studentsRouter
     // READ ONE
     .get('/students/:id', async (req, res) => {
         try {
-            const { client, db } = await dbConnect.connect();
-            const singleStudent = await db
-                .collection('students')
-                .findOne({ _id: new ObjectId(req.params.id) });
+            const singleStudent = await Students.findById(
+                req.params.id
+            );
 
             if (!singleStudent) {
-                throw new Error('Etudiant inconnu');
+                throw new Error('Etudiant introuvable');
             }
 
             res.send(singleStudent);
-            client.close();
         } catch (err) {
             res.status(404).json({ message: err.message });
         }
@@ -42,32 +34,26 @@ studentsRouter
     // INSERT ONE
     .post('/students', async (req, res) => {
         try {
-            const { client, db } = await dbConnect.connect();
-            let studentToAdd = {
-                name: req.body.name,
-                age: req.body.age,
-            };
+            const { name, age, scores } = req.body;
 
-            const allStudents = await db
-                .collection('students')
-                .find()
-                .toArray();
-
-            // Contrôle si l'étudiant est déjà inscrit
-            for (let i = 0; i < allStudents.length; i++) {
-                if (allStudents[i].name == studentToAdd.name) {
-                    throw new Error('Etudiant déjà inscrit');
-                }
+            // Vérifie si l'étudiant est inscrit
+            const studentNameExist = await Students.findOne({ name });
+            if (
+                studentNameExist &&
+                studentNameExist._id != req.params.id
+            ) {
+                throw new Error('Etudiant déjà inscrit');
             }
 
-            const students = await db
-                .collection('students')
-                .insertOne(studentToAdd);
+            // Créer un nouvel étudiant
+            const studentToAdd = new Students({
+                name,
+                age,
+                scores,
+            });
 
-            // Ajout de l'id généré par la DB à mon objet pour le visionner lors de la réponse
-            studentToAdd._id = students.insertedId;
-            res.json(studentToAdd);
-            client.close();
+            const savedStudent = await studentToAdd.save();
+            res.json(savedStudent);
         } catch (err) {
             res.status(400).json({ message: err.message });
         }
@@ -76,45 +62,36 @@ studentsRouter
     // UPDATE ONE
     .put('/students/:id', async (req, res) => {
         try {
-            const { client, db } = await dbConnect.connect();
+            const { name, age, scores } = req.body;
             let studentToUpdate = {
-                name: req.body.name,
-                age: req.body.age,
+                name,
+                age,
+                scores,
             };
-            const allStudents = await db
-                .collection('students')
-                .find()
-                .toArray();
+            const studentNameExist = await Students.findOne({ name });
+            if (
+                studentNameExist &&
+                studentNameExist._id != req.params.id
+            ) {
+                throw new Error('Prenom déjà utilisé');
+            }
 
-            // Contrôle si l'étudiant est déjà présente
-            for (let i = 0; i < allStudents.length; i++) {
-                if (allStudents[i].name == studentToUpdate.name) {
-                    throw new Error('Etudiant déjà existant');
+            const updatedStudent = await Students.findOneAndUpdate(
+                { _id: new ObjectId(req.params.id) },
+                {
+                    $set: studentToUpdate,
                 }
-            }
+            );
 
-            const updatedStudent = await db
-                .collection('students')
-                .findOneAndUpdate(
-                    { _id: new ObjectId(req.params.id) },
-                    {
-                        $set: {
-                            name: req.body.name,
-                            age: req.body.age,
-                        },
-                    },
-                    { returnOriginal: false }
-                );
-            if (!updatedStudent.value) {
+            if (!updatedStudent) {
                 throw new Error(
-                    "L'élève avec l'id : " +
+                    "L'étudiant avec l'id : '" +
                         req.params.id +
-                        ' est inexistant.'
+                        "' est introuvable."
                 );
             }
 
-            res.status(200).json('Etudiant mofidié avec succès');
-            client.close();
+            res.status(200).json('Etudiant modifié avec succès');
         } catch (err) {
             res.status(404).json({ message: err.message });
         }
@@ -123,17 +100,15 @@ studentsRouter
     // DELETE ONE
     .delete('/students/:id', async (req, res) => {
         try {
-            const { client, db } = await dbConnect.connect();
-            const { deletedCount } = await db
-                .collection('students')
-                .deleteOne({ _id: new ObjectId(req.params.id) });
+            const deletedCount = await Students.deleteOne({
+                _id: new ObjectId(req.params.id),
+            });
 
             if (deletedCount === 0) {
                 throw new Error('Etudiant introuvable');
             }
 
             res.status(200).json('Etudiant supprimé avec succès');
-            client.close();
         } catch (err) {
             res.status(404).json({ message: err.message });
         }

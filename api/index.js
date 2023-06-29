@@ -6,10 +6,14 @@ const router = express.Router();
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
+// DATABASE Connexion
+const dbConnect = require('./routers/dbConnect/dbConnect.js');
+dbConnect.connect();
+
 // ROUTERS
 const studentsRouter = require('./routers/studentsRouter');
 const classesRouter = require('./routers/classesRouter');
-const graduatesRouter = require('./routers/graduatesRouter');
+const scoresRouter = require('./routers/scoresRouter');
 const coursesRouter = require('./routers/coursesRouter');
 
 app.use(cors());
@@ -21,7 +25,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Uniquement "/" car tout est géré dans les routers
 app.use('/', studentsRouter);
 app.use('/', classesRouter);
-app.use('/', graduatesRouter);
+app.use('/', scoresRouter);
 app.use('/', coursesRouter);
 
 app.listen(config.PORT, () => {
