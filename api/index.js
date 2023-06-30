@@ -15,6 +15,7 @@ const studentsRouter = require('./routers/studentsRouter');
 const classesRouter = require('./routers/classesRouter');
 const scoresRouter = require('./routers/scoresRouter');
 const coursesRouter = require('./routers/coursesRouter');
+const teachersRouter = require('./routers/teachersRouter');
 
 app.use(cors());
 app.use(express.json());
@@ -27,6 +28,7 @@ app.use('/', studentsRouter);
 app.use('/', classesRouter);
 app.use('/', scoresRouter);
 app.use('/', coursesRouter);
+app.use('/', teachersRouter);
 
 app.listen(config.PORT, () => {
     console.log('Server listening on port ' + config.PORT);

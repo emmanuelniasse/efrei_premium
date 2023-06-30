@@ -1,141 +1,133 @@
 const express = require('express');
 const classesRouter = express.Router();
 const { ObjectId } = require('mongodb');
-const dbConnect = require('./dbConnect/dbConnect');
+const Classes = require('../schemas/classesSchema');
+const Students = require('../schemas/studentsSchema');
+const { success, error } = require('../functions/functions');
 
 classesRouter
     // READ ALL
     .get('/classes', async (req, res) => {
         try {
-            const { client, db } = await dbConnect.connect();
-            const classes = await db
-                .collection('classes')
-                .find()
-                .toArray();
-            res.json(classes);
-            client.close();
+            const classes = await Classes.find().populate({
+                path: 'students',
+                select: 'name age',
+            });
+            res.status(200).json(success(classes));
         } catch (err) {
-            res.status(500).json({ message: err.message });
+            res.status(500).json(error(err.message));
         }
     })
 
     // READ ONE
     .get('/classes/:id', async (req, res) => {
         try {
-            const { client, db } = await dbConnect.connect();
-            const singleClass = await db
-                .collection('classes')
-                .findOne({ _id: new ObjectId(req.params.id) });
+            const singleClass = await Classes.findById(
+                req.params.id
+            ).populate({ path: 'students', select: 'name' });
 
             if (!singleClass) {
                 throw new Error('Classe inconnue');
             }
 
-            res.send(singleClass);
-            client.close();
+            res.status(200).json(success(singleClass));
         } catch (err) {
-            res.status(404).json({ message: err.message });
+            res.status(500).json(error(err.message));
         }
     })
 
     // INSERT ONE
     .post('/classes', async (req, res) => {
         try {
-            const { client, db } = await dbConnect.connect();
-            let classToAdd = {
-                name: req.body.name,
-                nbOfStudents: req.body.nbOfStudents,
-            };
+            const { name } = req.body;
+            let nbOfStudents = 0;
+            // Vérifie si la classe est déjà crée
+            const thisClass = await Classes.findOne({ name });
 
-            const allClasses = await db
-                .collection('classes')
-                .find()
-                .toArray();
-
-            // Contrôle si la matière est déjà présent
-            for (let i = 0; i < allClasses.length; i++) {
-                if (allClasses[i].name == classToAdd.name) {
-                    throw new Error('Classe déjà existante');
-                }
+            if (thisClass && thisClass._id != req.params.id) {
+                throw new Error('Classe déjà crée');
             }
 
-            const insertedCourse = await db
-                .collection('classes')
-                .insertOne(classToAdd);
+            // Créer un nouvel étudiant
+            const classToAdd = new Classes({
+                name,
+                nbOfStudents,
+            });
 
-            // Ajout de l'id généré par la DB à mon objet pour le visionner lors de la réponse
-            classToAdd._id = insertedCourse.insertedId;
-            res.json(classToAdd);
-            client.close();
+            const savedClass = await classToAdd.save();
+            res.status(200).json(success(savedClass));
         } catch (err) {
-            res.status(400).json({ message: err.message });
+            res.status(500).json(error(err.message));
         }
     })
 
     // UPDATE ONE
     .put('/classes/:id', async (req, res) => {
         try {
-            const { client, db } = await dbConnect.connect();
+            const { name, studentId } = req.body;
+
+            // Calcule du nombre d'étudiants en fonction des nouvelles valeurs
+            const nbOfStudents = Array.isArray(studentId)
+                ? studentId.length
+                : 0;
+
             let classToUpdate = {
-                name: req.body.name,
-                nbOfStudents: req.body.nbOfStudents,
+                name,
+                nbOfStudents,
+                students: studentId,
             };
 
-            const allClasses = await db
-                .collection('classes')
-                .find()
-                .toArray();
+            // Vérifie si la classe est déjà insérée
+            const classNameExist = await Classes.findOne({ name });
+            if (
+                classNameExist &&
+                classNameExist._id != req.params.id
+            ) {
+                throw new Error('Classe déjà insérée');
+            }
 
-            // Contrôle si la classe est déjà présente
-            for (let i = 0; i < allClasses.length; i++) {
-                if (allClasses[i].name == classToUpdate.name) {
-                    throw new Error('Classe déjà existante');
+            // Insère les nouvelles valeurs
+            const updatedClass = await Classes.findOneAndUpdate(
+                { _id: new ObjectId(req.params.id) },
+                {
+                    $set: classToUpdate,
                 }
-            }
+            );
 
-            const updatedClass = await db
-                .collection('classes')
-                .findOneAndUpdate(
-                    { _id: new ObjectId(req.params.id) },
-                    {
-                        $set: {
-                            name: req.body.name,
-                            nbOfStudents: req.body.nbOfStudents,
-                        },
-                    },
-                    { returnOriginal: false }
-                );
-            if (!updatedClass.value) {
+            if (!updatedClass) {
                 throw new Error(
-                    "La classe avec l'id : " +
+                    "La classe avec l'id : '" +
                         req.params.id +
-                        ' est inexistant.'
+                        "' est introuvable."
                 );
             }
 
-            res.status(200).json('Classe mofidiée avec succès');
-            client.close();
+            // Modifie la classe de tous les étudiants en ayant une nouvelle
+            await Students.updateMany(
+                { _id: { $in: studentId } },
+                { $set: { class: updatedClass._id } }
+            );
+
+            res.status(200).json(success(classToUpdate));
         } catch (err) {
-            res.status(404).json({ message: err.message });
+            res.status(500).json(error(err.message));
         }
     })
 
     // DELETE ONE
     .delete('/classes/:id', async (req, res) => {
         try {
-            const { client, db } = await dbConnect.connect();
-            const { deletedCount } = await db
-                .collection('classes')
-                .deleteOne({ _id: new ObjectId(req.params.id) });
+            const deletedCount = await Classes.deleteOne({
+                _id: new ObjectId(req.params.id),
+            });
 
             if (deletedCount === 0) {
                 throw new Error('Classe introuvable');
             }
 
-            res.status(200).json('Classe supprimée avec succès');
-            client.close();
+            res.status(200).json(success('Cours supprimé'));
         } catch (err) {
-            res.status(404).json({ message: err.message });
+            res.status(500).json(error(err.message));
         }
     });
 

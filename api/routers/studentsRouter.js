@@ -1,16 +1,23 @@
 const express = require('express');
 const studentsRouter = express.Router();
 const { ObjectId } = require('mongodb');
+const Classes = require('../schemas/classesSchema');
 const Students = require('../schemas/studentsSchema');
+const { success, error } = require('../functions/functions');
 
 studentsRouter
     // READ ALL
     .get('/students', async (req, res) => {
         try {
-            const students = await Students.find();
-            res.send(students);
+            const students = await Students.find()
+                .populate({
+                    path: 'class',
+                    select: 'name nbOfStudents',
+                })
+                .populate({ path: 'scores', select: 'test score' });
+            res.status(200).json(success(students));
         } catch (err) {
-            res.status(500).json({ message: err.message });
+            res.status(500).json(error(err.message));
         }
     })
 
@@ -19,22 +26,22 @@ studentsRouter
         try {
             const singleStudent = await Students.findById(
                 req.params.id
-            );
+            ).populate('class');
 
             if (!singleStudent) {
                 throw new Error('Etudiant introuvable');
             }
 
-            res.send(singleStudent);
+            res.status(200).json(success(singleStudent));
         } catch (err) {
-            res.status(404).json({ message: err.message });
+            res.status(500).json(error(err.message));
         }
     })
 
     // INSERT ONE
     .post('/students', async (req, res) => {
         try {
-            const { name, age, scores } = req.body;
+            const { name, age, classId } = req.body;
 
             // Vérifie si l'étudiant est inscrit
             const studentNameExist = await Students.findOne({ name });
@@ -49,25 +56,32 @@ studentsRouter
             const studentToAdd = new Students({
                 name,
                 age,
-                scores,
+                class: classId,
             });
 
             const savedStudent = await studentToAdd.save();
-            res.json(savedStudent);
+
+            // Mettre à jour la classe avec l'ajout du nouvel étudiant
+            await Classes.findByIdAndUpdate(classId, {
+                $push: { students: savedStudent },
+            });
+
+            res.status(200).json(success(savedStudent));
         } catch (err) {
-            res.status(400).json({ message: err.message });
+            res.status(500).json(error(err.message));
         }
     })
 
     // UPDATE ONE
     .put('/students/:id', async (req, res) => {
         try {
-            const { name, age, scores } = req.body;
+            const { name, age, classId } = req.body;
             let studentToUpdate = {
                 name,
                 age,
-                scores,
+                class: classId,
             };
+
             const studentNameExist = await Students.findOne({ name });
             if (
                 studentNameExist &&
@@ -91,9 +105,16 @@ studentsRouter
                 );
             }
 
-            res.status(200).json('Etudiant modifié avec succès');
+            const savedStudent = await studentToUpdate.save();
+
+            // Mettre à jour la classe avec l'ajout du nouvel étudiant
+            await Classes.findByIdAndUpdate(classId, {
+                $push: { students: savedStudent },
+            });
+
+            res.status(200).json(success(studentToUpdate));
         } catch (err) {
-            res.status(404).json({ message: err.message });
+            res.status(500).json(error(err.message));
         }
     })
 
@@ -108,9 +129,11 @@ studentsRouter
                 throw new Error('Etudiant introuvable');
             }
 
-            res.status(200).json('Etudiant supprimé avec succès');
+            res.status(200).json(
+                success('Etudiant supprimé avec succès')
+            );
         } catch (err) {
-            res.status(404).json({ message: err.message });
+            res.status(500).json(error(err.message));
         }
     });
 
