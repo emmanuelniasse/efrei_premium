@@ -1,0 +1,13 @@
+@import '../../styles/variables';
+
+.homepage {
+    h1 {
+        font-family: $font1;
+    }
+    &__articles {
+        margin-top: 2rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1rem;
+    }
+}

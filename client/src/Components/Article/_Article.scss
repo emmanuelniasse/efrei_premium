@@ -1,0 +1,19 @@
+.article {
+    padding: 0.5rem;
+    box-shadow: $shadow1;
+    border-radius: 0.3rem;
+
+    &:hover {
+        box-shadow: $shadow2;
+    }
+
+    h3 {
+        font-family: $font3;
+        margin-bottom: 0.5rem;
+    }
+
+    p {
+        font-family: $font1;
+        color: $gray;
+    }
+}
