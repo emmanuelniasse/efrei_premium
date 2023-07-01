@@ -12,7 +12,6 @@ studentsRouter
             const students = await Students.find()
                 .populate({
                     path: 'class',
-                    select: 'name nbOfStudents',
                 })
                 .populate({ path: 'scores', select: 'test score' });
             res.status(200).json(success(students));

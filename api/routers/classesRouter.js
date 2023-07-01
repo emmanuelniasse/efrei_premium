@@ -40,7 +40,6 @@ classesRouter
     .post('/classes', async (req, res) => {
         try {
             const { name } = req.body;
-            let nbOfStudents = 0;
             // Vérifie si la classe est déjà crée
             const thisClass = await Classes.findOne({ name });
 
@@ -51,7 +50,6 @@ classesRouter
             // Créer un nouvel étudiant
             const classToAdd = new Classes({
                 name,
-                nbOfStudents,
             });
 
             const savedClass = await classToAdd.save();
@@ -66,14 +64,8 @@ classesRouter
         try {
             const { name, studentId } = req.body;
 
-            // Calcule du nombre d'étudiants en fonction des nouvelles valeurs
-            const nbOfStudents = Array.isArray(studentId)
-                ? studentId.length
-                : 0;
-
             let classToUpdate = {
                 name,
-                nbOfStudents,
                 students: studentId,
             };
 

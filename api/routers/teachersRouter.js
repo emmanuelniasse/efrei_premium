@@ -2,7 +2,6 @@ const express = require('express');
 const teachersRouter = express.Router();
 const { ObjectId } = require('mongodb');
 const Teachers = require('../schemas/teachersSchema');
-const Courses = require('../schemas/coursesSchema');
 const { success, error } = require('../functions/functions');
 
 teachersRouter
@@ -60,7 +59,7 @@ teachersRouter
         try {
             const { name, fname } = req.body;
 
-            const teacherNameExist = await Courses.findOne({
+            const teacherNameExist = await Teachers.findOne({
                 name,
             });
 
@@ -101,7 +100,7 @@ teachersRouter
     // DELETE ONE
     .delete('/teachers/:id', async (req, res) => {
         try {
-            const deletedCount = await Courses.deleteOne({
+            const deletedCount = await Teachers.deleteOne({
                 _id: new ObjectId(req.params.id),
             });
 

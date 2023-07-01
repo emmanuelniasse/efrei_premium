@@ -3,7 +3,6 @@ const { Schema } = mongoose;
 
 const classesSchema = new Schema({
     name: String,
-    nbOfStudents: Number,
     students: [
         {
             type: Schema.Types.ObjectId,

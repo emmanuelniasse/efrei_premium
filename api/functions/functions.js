@@ -1,13 +1,18 @@
-exports.success = function success(result) {
+function success(result) {
     return {
         status: 'success',
         result: result,
     };
-};
+}
 
-exports.error = function error(message) {
+function error(message) {
     return {
         status: 'error',
         message: message,
     };
+}
+
+module.exports = {
+    success: success,
+    error: error,
 };
