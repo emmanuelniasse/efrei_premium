@@ -17,11 +17,9 @@ export default function Navbar() {
                             <li>
                                 <Link to='/'>Accueil</Link>
                             </li>
+
                             <li>
                                 <Link to='/classes'>Classes</Link>
-                            </li>
-                            <li>
-                                <Link to='/notes'>Notes</Link>
                             </li>
                             <li>
                                 <Link to='/etudiants'>Etudiants</Link>

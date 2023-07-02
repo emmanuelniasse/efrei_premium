@@ -104,7 +104,15 @@ studentsRouter
                 );
             }
 
-            const savedStudent = await studentToUpdate.save();
+            const savedStudent = await updatedStudent.save();
+
+            // Vérifie si la classe de l'étudiant a été modifiée
+            if (String(savedStudent.class) !== String(classId)) {
+                // Supprime l'étudiant de la classe précédente
+                await Classes.findByIdAndUpdate(savedStudent.class, {
+                    $pull: { students: savedStudent._id },
+                });
+            }
 
             // Mettre à jour la classe avec l'ajout du nouvel étudiant
             await Classes.findByIdAndUpdate(classId, {

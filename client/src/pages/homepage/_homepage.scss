@@ -7,7 +7,47 @@
     &__articles {
         margin-top: 2rem;
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
         gap: 1rem;
+
+        &__article {
+            padding: 0.5rem;
+            box-shadow: $shadow1;
+            border-radius: $radius1;
+            height: 100%;
+
+            &:hover {
+                box-shadow: $shadow2;
+            }
+
+            h3 {
+                font-family: $font3;
+                margin-bottom: 0.5rem;
+            }
+
+            p {
+                font-family: $font1;
+                color: $gray;
+            }
+        }
+    }
+
+    &__content {
+        border: 2px solid red;
+        margin-top: 2rem;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+
+        @media (max-width: 800px) {
+            grid-template-columns: 1fr;
+        }
+
+        li {
+            display: block;
+            width: 100%;
+            background-color: lightcoral;
+            padding: 2rem;
+        }
     }
 }

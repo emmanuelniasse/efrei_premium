@@ -1,0 +1,20 @@
+@import '../../../styles/variables';
+
+.teacher__infos {
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+
+    &__img {
+        border-radius: 50%;
+        height: 4rem;
+        width: 4rem;
+        display: block;
+        margin-right: 1rem;
+    }
+
+    h3 {
+        font-family: $font1;
+        font-weight: 400;
+    }
+}

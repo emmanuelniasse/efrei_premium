@@ -1,12 +1,10 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import Article from '../../Components/Article/Article';
 
 export default function homepage() {
     return (
         <div className='homepage'>
-            <h1>L'hebdo des personnels</h1>
-            <ul className='homepage__articles'>
+            {/* <h1>L'hebdo des personnels</h1> */}
+            {/* <ul className='homepage__articles'>
                 <li>
                     <Link to='/article'>
                         <Article
@@ -47,6 +45,12 @@ export default function homepage() {
                         />
                     </Link>
                 </li>
+            </ul> */}
+            <ul className='homepage__content'>
+                <li>a</li>
+                <li>a</li>
+                <li>a</li>
+                <li>a</li>
             </ul>
         </div>
     );

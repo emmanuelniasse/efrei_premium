@@ -1,46 +1,64 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
-import Teacher from '../../Components/Teachers/Teacher/Teacher';
+import Course from '../../Components/Courses/Courses/Course';
 import axios from 'axios';
 
-import TeacherUpdateForm from '../../Components/Teachers/TeacherUpdateForm/TeacherUpdateForm';
-import TeacherAddForm from '../../Components/Teachers/TeacherAddForm/TeacherAddForm';
+import CourseUpdateForm from '../../Components/Courses/CourseUpdateForm/CourseUpdateForm';
+import CourseAddForm from '../../Components/Courses/CourseAddForm/CourseAddForm';
 
-import TeacherDeleteConfirm from '../../Components/Teachers/TeacherDeleteConfirm/TeacherDeleteConfirm';
+import CourseDeleteConfirm from '../../Components/Courses/CourseDeleteConfirm/CourseDeleteConfirm';
 
-export default function Teachers() {
+export default function Courses() {
     // States
+    const [courses, setCourses] = useState([]);
     const [teachers, setTeachers] = useState([]);
-    const [isTeachersFetched, setIsTeachersFetched] = useState(false);
+    const [isCoursesFetched, setIsCoursesFetched] = useState(false);
 
     const [isItemSelected, setIsItemSelected] = useState(false);
     const [items, setItems] = useState([]);
     const [isAddFormVisible, setIsAddFormVisible] = useState(false);
     const [isUpdateFormVisible, setIsUpdateFormVisible] =
         useState(false);
-    const [teacherDeleteConfirm, setTeacherDeleteConfirm] =
+    const [courseDeleteConfirm, setCourseDeleteConfirm] =
         useState(false);
 
-    // Récupère les teachers de la DB
+    // Récupère les courses de la DB
     useEffect(() => {
-        const getTeachers = async () => {
+        const getCourses = async () => {
             try {
-                const teachers = await axios.get(
-                    'http://localhost:3000/teachers/'
+                const courses = await axios.get(
+                    'http://localhost:3000/courses/'
                 );
-                setTeachers(teachers.data.result);
-                setIsTeachersFetched(true);
+                setCourses(courses.data.result);
+                setIsCoursesFetched(true);
                 console.log('Boucle infinie ?');
             } catch (err) {
                 console.log(
-                    'Erreur lors de la requête (teachers) : ' + err
+                    'Erreur lors de la requête (courses) : ' + err
                 );
             }
         };
-        if (!isTeachersFetched) {
+        const getTeachers = async () => {
+            try {
+                const teachers1 = await axios.get(
+                    `http://localhost:3000/teachers/`
+                );
+                setTeachers(teachers1.data.result);
+                setIsCoursesFetched(true);
+            } catch (error) {
+                console.log('error:', error);
+            }
+        };
+        console.log('Boucle infinie ?');
+        // teachers.map((t) => {
+        //     console.log(t.name);
+        // });
+
+        if (!isCoursesFetched) {
+            getCourses();
             getTeachers();
         }
-    }, [isTeachersFetched]);
+    }, [isCoursesFetched]);
 
     // Affiche le formulaire au clic sur le bouton "Ajouter"
     const handleAdd = () => {
@@ -49,7 +67,7 @@ export default function Teachers() {
 
     // Cache le formulaire au clic sur le bouton "Annuler"
     const handleCancel = () => {
-        setTeacherDeleteConfirm(false);
+        setCourseDeleteConfirm(false);
         setIsAddFormVisible(false);
         setIsUpdateFormVisible(false);
     };
@@ -60,9 +78,9 @@ export default function Teachers() {
         setItems([]);
     };
 
-    // Supprime les teachers
+    // Supprime les courses
     const handleDelete = async () => {
-        setTeacherDeleteConfirm(true);
+        setCourseDeleteConfirm(true);
     };
 
     // Modifie le professeur
@@ -95,12 +113,10 @@ export default function Teachers() {
 
     return (
         <>
-            <div className='teachers'>
-                <h1 className='teachers__title title-page'>
-                    Professeurs
-                </h1>
+            <div className='courses'>
+                <h1 className='courses__title title-page'>Cours</h1>
 
-                <div className='teachers__buttons'>
+                <div className='courses__buttons'>
                     {/* CRUD  */}
                     {isItemSelected && (
                         <>
@@ -139,69 +155,68 @@ export default function Teachers() {
                 </div>
 
                 {isAddFormVisible && (
-                    <div className='teachers__form-container'>
-                        <TeacherAddForm
+                    <div className='courses__form-container'>
+                        <CourseAddForm
                             setIsAddFormVisible={setIsAddFormVisible}
                             handleCancel={handleCancel}
-                            setIsTeachersFetched={
-                                setIsTeachersFetched
-                            }
+                            setIsCoursesFetched={setIsCoursesFetched}
+                            teachers={teachers}
                         />
                     </div>
                 )}
 
                 {isUpdateFormVisible && (
-                    <div className='teachers__form-container'>
-                        <TeacherUpdateForm
+                    <div className='courses__form-container'>
+                        <CourseUpdateForm
                             setIsUpdateFormVisible={
                                 setIsUpdateFormVisible
                             }
                             handleCancel={handleCancel}
                             items={items}
                             setItems={setItems}
-                            setIsTeachersFetched={
-                                setIsTeachersFetched
-                            }
+                            setIsCoursesFetched={setIsCoursesFetched}
                         />
                     </div>
                 )}
 
-                {teacherDeleteConfirm && (
-                    <div className='teachers__modal'>
-                        <TeacherDeleteConfirm
-                            setTeacherDeleteConfirm={
-                                setTeacherDeleteConfirm
+                {courseDeleteConfirm && (
+                    <div className='courses__modal'>
+                        <CourseDeleteConfirm
+                            setCourseDeleteConfirm={
+                                setCourseDeleteConfirm
                             }
                             handleCancel={handleCancel}
-                            setIsTeachersFetched={
-                                setIsTeachersFetched
-                            }
+                            setIsCoursesFetched={setIsCoursesFetched}
                             setItems={setItems}
                             items={items}
                         />
                     </div>
                 )}
 
-                <ul className='teachers__list'>
-                    {teachers.map((teacher, index) => {
-                        let itemSelectedTeacher = items.includes(
-                            teacher._id
+                <ul className='courses__list'>
+                    {courses.map((course, index) => {
+                        let itemSelectedCourse = items.includes(
+                            course._id
                         )
                             ? 'item-selected'
                             : 'item-not-selected';
+
+                        const teacherName = course.teacher
+                            ? course.teacher.name
+                            : 'Pas de professeur';
                         return (
                             <li
-                                key={teacher._id}
-                                className={`teachers__list__item ${itemSelectedTeacher}`}
+                                key={course._id}
+                                className={`courses__list__item ${itemSelectedCourse}`}
                                 onClick={() => {
                                     setIsItemSelected(true);
-                                    handleListItems(teacher._id);
+                                    handleListItems(course._id);
                                 }}
                             >
-                                <Teacher
-                                    name={teacher.name}
-                                    fname={teacher.fname}
-                                    setTeachers={setTeachers}
+                                <Course
+                                    entitled={course.entitled}
+                                    teacher={teacherName}
+                                    setCourses={setCourses}
                                 />
                             </li>
                         );

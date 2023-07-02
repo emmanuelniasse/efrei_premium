@@ -2,13 +2,12 @@
 @import '../Components/Navbar/_Navbar.scss',
     '../Components/Footer/_Footer.scss',
     '../Components/Layout/_Layout.scss',
-    '../Components/Article/Article.scss',
-    '../Components/Classroom/Classroom.scss',
-    '../Components/Form/Form.scss';
+    '../Components/Classes/Classroom/Classroom.scss',
+    '../Components/Classes/ClassAddForm/Form.scss',
+    '../Components/Teachers/Teacher/Teacher';
 
 // Pages
-@import url('../pages/homepage/_homepage.scss');
-@import url('../pages/Classes/_classes.scss');
+@import '../pages/homepage/_homepage.scss', '../pages/_pages.scss';
 
 // Abstracts
 @import './variables';
@@ -37,9 +36,13 @@ ul li {
 .container {
     margin: 0 auto;
     width: 80vw;
+    max-width: 1300px;
 }
 
 .btn {
+    &:not(:last-of-type) {
+        margin-right: 1rem;
+    }
     font-family: $font1;
     height: 2rem;
     display: flex;
@@ -47,26 +50,74 @@ ul li {
     justify-content: center;
     width: fit-content;
     padding: 0 1rem;
-    border-radius: 0.3rem;
     box-shadow: $shadow1;
+    border-radius: $radius1;
+
+    color: #f1f1f1;
 
     &:hover {
         box-shadow: $shadow2;
         cursor: pointer;
     }
+
+    &-add {
+        background-color: $valid;
+    }
+
+    &-add--plus {
+        background-color: $valid;
+
+        font-size: 1.8em;
+        font-weight: 300;
+        border-radius: 50%;
+        height: 2rem;
+        width: 2rem;
+    }
+
+    &-update {
+        background-color: $warning;
+    }
+
+    &-delete {
+        background-color: $danger;
+    }
+
+    &-cancel {
+        background-color: $primary;
+    }
+}
+
+.title-page {
+    margin-bottom: 1rem;
 }
 
 input,
 textarea,
 select,
 button {
+    font-size: inherit;
     border: $border-input;
     padding: 0.3rem 0.5rem;
-    border-radius: 0.3rem;
+    border-radius: $radius1;
     background: inherit;
     font-family: inherit;
 
     &:focus {
         outline: none;
     }
+}
+
+.item-selected {
+    background-color: $itemSelected;
+    box-shadow: 0 8px 6px -6px black !important;
+    color: white;
+    border-radius: $radius1;
+    transition: 0.15s all ease-out;
+
+    p {
+        color: white !important;
+    }
+}
+.item-not-selected {
+    transition: 0.15s all ease-out;
 }

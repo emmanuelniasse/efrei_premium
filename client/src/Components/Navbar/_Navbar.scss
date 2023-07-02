@@ -24,6 +24,7 @@
         &__links {
             ul {
                 display: flex;
+                justify-content: space-evenly;
 
                 li:not(:last-of-type) {
                     margin-right: 1rem;

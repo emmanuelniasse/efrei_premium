@@ -1,180 +1,235 @@
 import React from 'react';
-// , { useState, useEffect }
-// import axios from 'axios';
+import { useEffect, useState } from 'react';
+import Student from '../../Components/Students/Student/Student';
+import axios from 'axios';
 
-const students = () => {
-    // const [eleves, setEleves] = useState([]);
-    // const [newEleve, setNewEleve] = useState({
-    //     surname: '',
-    //     name: '',
-    // });
-    // const [updatingEleve, setUpdatingEleve] = useState(null);
+import StudentUpdateForm from '../../Components/Students/StudentUpdateForm/StudentUpdateForm';
+import StudentAddForm from '../../Components/Students/StudentAddForm/StudentAddForm';
+import StudentDeleteConfirm from '../../Components/Students/StudentDeleteConfirm/StudentDeleteConfirm';
 
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         try {
-    //             const result = await axios.get(
-    //                 `http://localhost:3000/students`
-    //             );
-    //             // const parsedData = JSON.parse(result.data);
-    //             setEleves(result.data);
-    //             // console.log(result.data);
-    //             // for (let i = 0; i < result.data.length; i++) {
-    //             //     console.log(result.data[i].name);
-    //             // }
-    //         } catch (error) {
-    //             console.log('error:', error);
-    //         }
-    //     };
-    //     fetchData();
-    // }, []);
+export default function Students() {
+    // States
+    const [students, setStudents] = useState([]);
+    const [isStudentsFetched, setIsStudentsFetched] = useState(false);
+    const [isItemSelected, setIsItemSelected] = useState(false);
+    const [items, setItems] = useState([]);
+    const [isAddFormVisible, setIsAddFormVisible] = useState(false);
+    const [isUpdateFormVisible, setIsUpdateFormVisible] =
+        useState(false);
+    const [studentDeleteConfirm, setStudentDeleteConfirm] =
+        useState(false);
 
-    // const handleInputChange = (event) => {
-    //     const { name, value } = event.target;
-    //     setNewEleve({ ...newEleve, [name]: value });
-    // };
+    const [classes, setClasses] = useState([]);
 
-    // const handleUpdateInputChange = (event) => {
-    //     const { name, value } = event.target;
-    //     setUpdatingEleve({ ...updatingEleve, [name]: value });
-    // };
+    // Récupère les students de la DB
+    useEffect(() => {
+        const getStudents = async () => {
+            try {
+                const students = await axios.get(
+                    'http://localhost:3000/students/'
+                );
+                setStudents(students.data.result);
+                setIsStudentsFetched(true);
+            } catch (err) {
+                console.log(
+                    'Erreur lors de la requête (students) : ' + err
+                );
+            }
+        };
 
-    // const handleCreateEleve = async () => {
-    //     try {
-    //         const result = await axios.post(
-    //             `http://localhost:3000/eleve/create`,
-    //             newEleve
-    //         );
-    //         setEleves([...eleves, result.data.ops[0]]);
-    //         setNewEleve({ surname: '', name: '' });
-    //     } catch (error) {
-    //         console.log('error:', error);
-    //     }
-    // };
+        const getClasses = async () => {
+            try {
+                const classes = await axios.get(
+                    'http://localhost:3000/classes/'
+                );
 
-    // const handleDeleteEleve = async (eleveId) => {
-    //     try {
-    //         await axios.delete(
-    //             `http://localhost:3000/eleve/delete/${eleveId}`
-    //         );
-    //         setEleves(
-    //             eleves.filter((eleve) => eleve._id !== eleveId)
-    //         );
-    //     } catch (error) {
-    //         console.log('error:', error);
-    //     }
-    // };
+                setClasses(classes.data.result);
+            } catch (err) {
+                console.log(
+                    'Erreur lors de la requête (students) : ' + err
+                );
+            }
+        };
 
-    // const handleUpdateEleve = async (eleveId) => {
-    //     try {
-    //         const result = await axios.put(
-    //             `http://localhost:3000/eleve/update/${eleveId}`,
-    //             updatingEleve
-    //         );
-    //         const updatedEleves = eleves.map((eleve) => {
-    //             if (eleve._id === result.data._id) {
-    //                 return result.data;
-    //             }
-    //             return eleve;
-    //         });
-    //         setEleves(updatedEleves);
-    //         setUpdatingEleve(null);
-    //     } catch (error) {
-    //         console.log('error:', error);
-    //     }
-    // };
+        if (!isStudentsFetched) {
+            getStudents();
+            getClasses();
+        }
+    }, [isStudentsFetched]);
 
-    // console.log(eleves.data);
+    // Affiche le formulaire au clic sur le bouton "Ajouter une étudiant"
+    const handleAdd = () => {
+        setIsAddFormVisible(true);
+    };
+
+    // Cache le formulaire au clic sur le bouton "Annuler"
+    const handleCancel = () => {
+        setStudentDeleteConfirm(false);
+        setIsAddFormVisible(false);
+        setIsUpdateFormVisible(false);
+    };
+
+    // Annule la selection d'item
+    const handleCancelSelection = () => {
+        setIsItemSelected(false);
+        setItems([]);
+    };
+
+    // Supprime les students
+    const handleDelete = async () => {
+        setStudentDeleteConfirm(true);
+    };
+
+    // Modifie la étudiant
+    const handleUpdate = async () => {
+        setIsUpdateFormVisible(true);
+    };
+
+    // Cache les boutons CRUD dans le cas où aucun items n'est sélectionné
+    useEffect(() => {
+        items.length < 1 && setIsItemSelected(false);
+
+        // console.log(items);
+    }, [items]);
+
+    // Stock l'id des items sélectionnés
+    // `prevItems` représente la valeur précédente de l'état items
+    const handleListItems = (itemId) => {
+        setItems((prevItems) => {
+            if (prevItems.includes(itemId)) {
+                // Si l'élément est déjà présent, on le supprime du tableau
+                return prevItems.filter(
+                    (prevItem) => prevItem !== itemId
+                );
+            } else {
+                // Si l'élément n'est pas présent, on l'ajoute au tableau
+                return [...prevItems, itemId];
+            }
+        });
+    };
 
     return (
-        <h1>Etudiants</h1>
-        // <div>
-        //     <h1>Liste des élèves</h1>
-        //     <ul>
-        //         {eleves.map((eleve) => (
-        //             <li key={eleve._id}>
-        //                 <p>
-        //                     {eleve.surname} {eleve.name}
-        //                 </p>
-        //                 <button
-        //                     onClick={() =>
-        //                         handleDeleteEleve(eleve._id)
-        //                     }
-        //                 >
-        //                     Supprimer
-        //                 </button>
-        //                 <button
-        //                     onClick={() => setUpdatingEleve(eleve)}
-        //                 >
-        //                     Mettre à jour
-        //                 </button>
-        //             </li>
-        //         ))}
-        //     </ul>
-        //     <h2>Créer un nouvel élève</h2>
-        //     <div>
-        //         <label htmlFor='nom'>Nom :</label>
-        //         <input
-        //             type='text'
-        //             id='nom'
-        //             name='nom'
-        //             value={newEleve.nom}
-        //             onChange={handleInputChange}
-        //         />
-        //     </div>
-        //     <div>
-        //         <label htmlFor='prenom'>Prénom :</label>
-        //         <input
-        //             type='text'
-        //             id='prenom'
-        //             name='prenom'
-        //             value={newEleve.prenom}
-        //             onChange={handleInputChange}
-        //         />
-        //         <button onClick={handleCreateEleve}>Créer</button>
-        //     </div>
-        //     {updatingEleve && (
-        //         <div>
-        //             <h2>
-        //                 Mettre à jour {updatingEleve.nom}{' '}
-        //                 {updatingEleve.prenom}
-        //             </h2>
-        //             <div>
-        //                 <label htmlFor='nom'>Nom :</label>
-        //                 <input
-        //                     type='text'
-        //                     id='nom'
-        //                     name='nom'
-        //                     value={updatingEleve.nom}
-        //                     onChange={handleUpdateInputChange}
-        //                 />
-        //             </div>
-        //             <div>
-        //                 <label htmlFor='prenom'>Prénom :</label>
-        //                 <input
-        //                     type='text'
-        //                     id='prenom'
-        //                     name='prenom'
-        //                     value={updatingEleve.prenom}
-        //                     onChange={handleUpdateInputChange}
-        //                 />
-        //                 <button
-        //                     onClick={() =>
-        //                         handleUpdateEleve(updatingEleve._id)
-        //                     }
-        //                 >
-        //                     Enregistrer
-        //                 </button>
-        //                 <button
-        //                     onClick={() => setUpdatingEleve(null)}
-        //                 >
-        //                     Annuler
-        //                 </button>
-        //             </div>
-        //         </div>
-        //     )}
-        // </div>
-    );
-};
+        <>
+            <div className='students'>
+                <h1 className='students__title title-page'>
+                    Etudiants
+                </h1>
 
-export default students;
+                <div className='students__buttons'>
+                    {/* CRUD  */}
+                    {isItemSelected && (
+                        <>
+                            <div
+                                className='btn-delete btn'
+                                onClick={handleDelete}
+                            >
+                                Supprimer
+                            </div>
+                            {items.length == 1 && (
+                                <div
+                                    className='btn-update btn'
+                                    onClick={handleUpdate}
+                                >
+                                    Modifier
+                                </div>
+                            )}
+                            {!isUpdateFormVisible && (
+                                <div
+                                    className='btn-cancel btn'
+                                    onClick={handleCancelSelection}
+                                >
+                                    Tout désélectionner
+                                </div>
+                            )}
+                        </>
+                    )}
+                    {!isAddFormVisible && !isItemSelected && (
+                        <div
+                            className='btn btn-add--plus'
+                            onClick={handleAdd}
+                        >
+                            +
+                        </div>
+                    )}
+                </div>
+
+                {isAddFormVisible && (
+                    <div className='students__form-container'>
+                        <StudentAddForm
+                            setIsAddFormVisible={setIsAddFormVisible}
+                            handleCancel={handleCancel}
+                            setIsStudentsFetched={
+                                setIsStudentsFetched
+                            }
+                            classes={classes}
+                        />
+                    </div>
+                )}
+
+                {isUpdateFormVisible && (
+                    <div className='students__form-container'>
+                        <StudentUpdateForm
+                            items={items}
+                            setItems={setItems}
+                            setIsUpdateFormVisible={
+                                setIsUpdateFormVisible
+                            }
+                            handleCancel={handleCancel}
+                            setIsStudentsFetched={
+                                setIsStudentsFetched
+                            }
+                            classes={classes}
+                        />
+                    </div>
+                )}
+
+                {studentDeleteConfirm && (
+                    <div className='students__modal'>
+                        <StudentDeleteConfirm
+                            setStudentDeleteConfirm={
+                                setStudentDeleteConfirm
+                            }
+                            handleCancel={handleCancel}
+                            setIsStudentsFetched={
+                                setIsStudentsFetched
+                            }
+                            setItems={setItems}
+                            items={items}
+                        />
+                    </div>
+                )}
+
+                <ul className='students__list'>
+                    {students.map((student) => {
+                        let itemSelectedStudent = items.includes(
+                            student._id
+                        )
+                            ? 'item-selected'
+                            : '';
+                        const classroomName = student.class
+                            ? student.class.name
+                            : '';
+
+                        return (
+                            <li
+                                key={student._id}
+                                className={`students__list__item ${itemSelectedStudent}`}
+                                onClick={() => {
+                                    setIsItemSelected(true);
+                                    handleListItems(student._id);
+                                }}
+                            >
+                                <Student
+                                    name={student.name}
+                                    age={student.age}
+                                    classroom={classroomName}
+                                    setStudents={setStudents}
+                                />
+                            </li>
+                        );
+                    })}
+                </ul>
+            </div>
+        </>
+    );
+}
