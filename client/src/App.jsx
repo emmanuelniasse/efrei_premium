@@ -4,8 +4,8 @@ import Home from './pages/homepage/homepage';
 import Courses from './pages/Courses/Courses';
 import Classes from './pages/Classes/Classes';
 
-import Students from './pages/Students/Students';
-import Teachers from './pages/Teachers/Teachers';
+import Students from './pages/students/students';
+import Teachers from './pages/teachers/teachers';
 
 export default function App() {
     return (
